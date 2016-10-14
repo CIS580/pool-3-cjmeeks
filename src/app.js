@@ -246,6 +246,37 @@ function update(elapsedTime) {
   });
 
   // TODO: Process ball collisions
+  collisions.forEach(function(pair){
+    //find the normal of collisions
+    var collisionNormal = {
+      x: pair.a.x - pair.b.y,
+      y: pair.a.y - pair.b.y
+    };
+    //calculates the overlap between balls
+    var overlap = 30 - Vector.magnitude(collisionNormal);
+    var collisionNormal = Vector.normalize(collisionNormal);
+    pair.a.position.x += collisionNormal.x*overlap/2;
+    pair.a.position.y += collisionNormal.y*overlap/2;
+    pair.b.position.x -= collisionNormal.x*overlap/2;
+    pair.b.position.y -= collisionNormal.y*overlap/2;
+    //rotate the problem space so that the normal
+    //of collision lies along the x-axis
+    var angle = Math.atan2(collisionNormal.y, collisionNormal.x);
+    var a = Vector.rotate(pair.a.velocity, angle);
+    var b = Vector.rotate(pair.b.velocity, angle);
+    //solve the collision along the x-axis
+    var s = a.x;
+    a.x = b.x;
+    b.x = s;
+    //rotate the problem space back to world space
+    a = Vector.rotate(a, -angle);
+    b = Vector.rotate(b, -angle);
+    pair.a.velocity.x = a.x;
+    pair.a.velocity.y = a.y;
+    pair.b.velocity.x = b.x;
+    pair.b.velocity.y = b.y;
+  });
+
 }
 
 /**
